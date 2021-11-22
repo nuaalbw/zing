@@ -8,12 +8,14 @@
 #ifndef ZING_NET_PIPE_H
 #define ZING_NET_PIPE_H
 
+#include "../base/noncopyable.h"
+
 namespace zing
 {
 namespace net
 {
 
-class Pipe
+class Pipe: noncopyable
 {
 public:
 	bool create();
