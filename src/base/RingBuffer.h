@@ -66,10 +66,12 @@ public:
 	}
 
 private:
-	bool pushData(T&& data)
+
+	template<typename F>
+	bool pushData(F&& data)
 	{
 		if (size_ < capacity_) {
-			buffer_[putPos_] = std::forward<T>(data);
+			buffer_[putPos_] = std::forward<F>(data);
 			add(putPos_);
 			size_++;
 			return true;
