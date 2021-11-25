@@ -22,10 +22,11 @@ namespace zing
 namespace net
 {
 
+using EventCallback = std::function<void(void)>;
+
 // 抽象基类，IO multiplexing的封装
 class TaskScheduler: noncopyable
 {
-	using EventCallback = std::function<void(void)>;
 	using PipePtr = std::unique_ptr<Pipe>;
 	using RingBufferPtr = std::unique_ptr<base::RingBuffer<EventCallback>>;
 

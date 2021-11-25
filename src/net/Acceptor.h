@@ -11,6 +11,7 @@
 #include "../base/noncopyable.h"
 #include "TcpSocket.h"
 #include "Channel.h"
+#include "EventLoop.h"
 #include <functional>
 #include <mutex>
 #include <memory>
@@ -23,7 +24,6 @@ namespace net
 using NewConnectionCallback = std::function<void(int)>;
 using TcpSocketPtr = std::unique_ptr<TcpSocket>;
 
-class EventLoop;
 
 class Acceptor: noncopyable
 {
