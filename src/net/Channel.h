@@ -29,6 +29,7 @@ enum EventType
 	EVENT_RDHUP	= 8192
 };
 
+// 作用：将IO multiplexing拿到的IO事件分发给不同的事件处理函数
 class Channel: noncopyable
 {
 public:
@@ -37,7 +38,7 @@ public:
 	explicit Channel(int sockfd);
 	virtual ~Channel();
 
-	// 设置事件回调
+	// 将不同的事件分发给不同的回调
 	void setReadCallback(EventCallback cb);
 	void setWriteCallback(EventCallback cb);
 	void setCloseCallback(EventCallback cb);

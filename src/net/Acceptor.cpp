@@ -13,7 +13,7 @@ using namespace zing::net;
 
 Acceptor::Acceptor(EventLoop* loop)
 	: loop_(loop), 
-	  socket_(new TcpSocket)
+	  acceptSocket_(new TcpSocket)
 {
 }
 
@@ -30,27 +30,28 @@ int Acceptor::listen(std::string ip, uint16_t port)
 {
 	std::lock_guard<std::mutex> locker(mutex_);
 
-	if (socket_->getSocket() > 0) {
-		socket_->close();
+	if (acceptSocket_->getSocket() > 0) {
+		acceptSocket_->close();
 	}
 
-	int sockfd = socket_->create();
-	channel_.reset(new Channel(sockfd));
+	int sockfd = acceptSocket_->create();
+	acceptChannel_.reset(new Channel(sockfd));
 	SocketUtil::setReuseAddr(sockfd);
 	SocketUtil::setReusePort(sockfd);
 	SocketUtil::setNonblock(sockfd);
 
-	if (!socket_->bind(ip, port)) {
+	if (!acceptSocket_->bind(ip, port)) {
 		return -1;
 	}
 
-	if (!socket_->listen(1024)) {
+	if (!acceptSocket_->listen(1024)) {
 		return -1;
 	}
 
-	channel_->setReadCallback( [this](){ this->onAccept(); } );
-	channel_->enableReading();
-	loop_->updateChannel(channel_);
+	// acceptChannel_->setReadCallback( [this](){ this->onAccept(); } );
+	acceptChannel_->setReadCallback(std::bind(&Acceptor::onAccept, this));
+	acceptChannel_->enableReading();
+	loop_->updateChannel(acceptChannel_);
 
 	return 0;
 }
@@ -59,9 +60,9 @@ void Acceptor::close()
 {
 	std::lock_guard<std::mutex> locker(mutex_);
 
-	if (socket_->getSocket() > 0) {
-		loop_->removeChannel(channel_);
-		socket_->close();
+	if (acceptSocket_->getSocket() > 0) {
+		loop_->removeChannel(acceptChannel_);
+		acceptSocket_->close();
 	}
 }
 
@@ -69,8 +70,8 @@ void Acceptor::onAccept()
 {
 	std::lock_guard<std::mutex> locker(mutex_);
 
-	int socket = socket_->getSocket();
-	if (socket_ > 0) {
+	int socket = acceptSocket_->getSocket();
+	if (acceptSocket_ > 0) {
 		if (newConnectionCallback_) {
 			newConnectionCallback_(socket);
 		}

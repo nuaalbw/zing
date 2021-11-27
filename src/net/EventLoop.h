@@ -12,7 +12,6 @@
 #include "Pipe.h"
 #include "Timer.h"
 #include "../base/RingBuffer.h"
-
 #include <mutex>
 #include <functional>
 #include <memory>
@@ -48,8 +47,8 @@ private:
 	std::mutex mutex_;
 	uint32_t threadNum_;
 	uint32_t index_;
-	std::vector<TaskSchedulerPtr> taskSchedulers_;
-	std::vector<ThreadPtr> threads_;
+	std::vector<TaskSchedulerPtr> taskSchedulers_;	// loops
+	std::vector<ThreadPtr> threads_;	// threads
 };
 	
 } // namespace net

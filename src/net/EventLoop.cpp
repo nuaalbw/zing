@@ -90,6 +90,7 @@ void EventLoop::loop()
 {
 	std::lock_guard<std::mutex> locker(mutex_);
 
+	// 防止重复调用
 	if (!taskSchedulers_.empty()) {
 		return;
 	}

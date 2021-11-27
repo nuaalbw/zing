@@ -24,7 +24,7 @@ namespace net
 using NewConnectionCallback = std::function<void(int)>;
 using TcpSocketPtr = std::unique_ptr<TcpSocket>;
 
-
+// 用于accept新TCP连接，并通过回调通知使用者
 class Acceptor: noncopyable
 {
 public:
@@ -41,8 +41,8 @@ private:
 private:
 	EventLoop* loop_;
 	std::mutex mutex_;
-	TcpSocketPtr socket_;
-	ChannelPtr channel_;
+	TcpSocketPtr acceptSocket_;
+	ChannelPtr acceptChannel_;	// 用于观察acceptSocket上的readable事件
 	NewConnectionCallback newConnectionCallback_;
 };
 	
