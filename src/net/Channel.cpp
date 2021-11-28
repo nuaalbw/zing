@@ -92,20 +92,20 @@ bool Channel::isReading() const
 
 void Channel::handleEvent(int events)
 {
-	if (events_ & (EVENT_PRI | EVENT_IN)) {
+	if (events & (EVENT_PRI | EVENT_IN)) {
 		readCallback_();
 	}
 
-	if (events_ & (EVENT_OUT)) {
+	if (events & (EVENT_OUT)) {
 		writeCallback_();
 	}
 
-	if (events_ & EVENT_HUP) {
+	if (events & EVENT_HUP) {
 		closeCallback_();
 		return;
 	}
 
-	if (events_ & EVENT_ERR) {
+	if (events & EVENT_ERR) {
 		errorCallback_();
 	}
 }
