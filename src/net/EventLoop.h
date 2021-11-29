@@ -49,6 +49,7 @@ private:
 	uint32_t index_;
 	std::vector<TaskSchedulerPtr> taskSchedulers_;	// loops
 	std::vector<ThreadPtr> threads_;	// threads
+	bool running_;
 };
 	
 } // namespace net
