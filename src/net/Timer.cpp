@@ -16,9 +16,9 @@ using namespace std::chrono;
 using std::this_thread::sleep_for;
 
 Timer::Timer(TimerCallback cb, uint32_t msec)
-			: callback_(std::move(cb)), 
+			: repeat_(false), 
+			  callback_(std::move(cb)), 
 			  interval_(msec == 0 ? 1 : msec), 
-			  repeat_(false), 
 			  nextTimeout_(0)
 {
 }
