@@ -1,27 +1,22 @@
-DIR_INC = ./
-DIR_SRC1 = ./base
-DIR_SRC2 = ./net
-DIR_OBJ = ./obj
-
-SRCS = $(wildcard $(DIR_SRC)/*)
-OBJS_1 = $(patsubst %.cpp, $(DIR_OBJ)/%.o, $(filter %.cpp, $(notdir $(SRCS))))
-OBJS_2 = $(patsubst %.cc, $(DIR_OBJ)/%.o, $(filter %.cc, $(notdir $(SRCS))))
+LIB_SRCS1=$(wildcard base/*.cpp)
+LIB_SRCS2=$(wildcard net/*.cpp)
+LIB_NAME=zing
 
 CC = g++
-CFLAGS = -Wall -g -I$(DIR_INC) -std=c++11 -lpthread -lprotobuf -ljson -lcrypto -lmysqlclient
+CFLAGS=-Wall -std=c++11
+LDFLAGS=-lpthread
 
-ALL:$(BIN_TARGET)
+ALL:static_lib shared_lib
 
-$(BIN_TARGET):$(OBJS_1) $(OBJS_2)
-	$(CC) $(OBJS_1) $(OBJS_2) $(CFLAGS) -o $@ 
+static_lib:$(LIB_SRCS1) $(LIB_SRCS2)
+	$(CC) -c $^ $(CFLAGS) $(LDFLAGS)
+	ar -rcs lib$(LIB_NAME).a *.o
+	rm -rf *.o
 
-$(DIR_OBJ)/%.o:$(DIR_SRC)/%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@	
-
-$(DIR_OBJ)/%.o:$(DIR_SRC)/%.cc
-	$(CC) $(CFLAGS) -c $< -o $@	
+shared_lib:$(LIB_SRCS1) $(LIB_SRCS2)
+	$(CC) -fPIC -shared $^ -o lib$(LIB_NAME).so
 
 clean:
-	rm -rf $(DIR_OBJ)/*.o $(BIN_TARGET)
+	rm -rf lib$(LIB_NAME).a lib$(LIB_NAME).so
 
 .PHONY:clean ALL
