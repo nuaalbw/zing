@@ -6,9 +6,11 @@
  ************************************************************************/
 
 #include "TcpServer.h"
+#include "../base/Logger.h"
 
 using namespace zing;
 using namespace zing::net;
+using namespace zing::base;
 
 TcpServer::TcpServer(EventLoop* loop)
 	: loop_(loop), 
@@ -16,22 +18,8 @@ TcpServer::TcpServer(EventLoop* loop)
 	  acceptor_(new Acceptor(loop)), 
 	  started_(false)
 {
-	acceptor_->setNewConnectionCallback([this](int sockfd) {
-		TcpConnectionPtr conn = onConnection(sockfd);
-		if (conn) {
-			addConnection(sockfd, conn);
-			conn->setDisconnectionCallback([this](TcpConnectionPtr conn) {
-				TaskScheduler* scheduler = conn->taskScheduler();
-				int sockfd = conn->fd();
-				bool ret = scheduler->addTriggerEvent(
-					[this, sockfd]() { removeConnection(sockfd); });
-				if (!ret) {
-					scheduler->addTimer(
-						[this, sockfd]() { removeConnection(sockfd); return false; }, 100);
-				}
-			});
-		}
-	});
+	acceptor_->setNewConnectionCallback(
+		std::bind(&TcpServer::onNewConnection, this, std::placeholders::_1));
 }
 
 TcpServer::~TcpServer()
@@ -79,6 +67,16 @@ void TcpServer::stop()
 	}
 }
 
+void TcpServer::setConnectionCallback(const ConnectionCallback& cb)
+{
+	connectionCallback_ = cb;
+}
+
+void TcpServer::setMessageCallback(const MessageCallback& cb)
+{
+	messageCallback_ = cb;
+}
+
 std::string TcpServer::ip() const
 {
 	return ip_;
@@ -87,12 +85,6 @@ std::string TcpServer::ip() const
 uint16_t TcpServer::port() const
 {
 	return port_;
-}
-
-TcpConnectionPtr TcpServer::onConnection(int sockfd)
-{
-	return std::make_shared<TcpConnection>(
-		loop_->getTaskScheduler().get(), sockfd);
 }
 
 void TcpServer::addConnection(int sockfd, TcpConnectionPtr conn)
@@ -107,4 +99,33 @@ void TcpServer::removeConnection(int sockfd)
 	std::lock_guard<std::mutex> locker(mutex_);
 
 	connections_.erase(sockfd);
+}
+
+void TcpServer::onNewConnection(int sockfd)
+{
+	LOG_INFO("onNewConnection call!!!");
+	auto conn = std::make_shared<TcpConnection>(
+		loop_->getTaskScheduler().get(), sockfd);
+
+	if (connectionCallback_) {
+		connectionCallback_(conn);
+	}
+
+	if (messageCallback_) {
+		conn->setReadCallback(messageCallback_);
+	}
+
+	if (conn) {
+		addConnection(sockfd, conn);
+		conn->setDisconnectionCallback([this](TcpConnectionPtr conn) {
+			TaskScheduler* scheduler = conn->taskScheduler();
+			int sockfd = conn->fd();
+			bool ret = scheduler->addTriggerEvent(
+				[this, sockfd]() { removeConnection(sockfd); });
+			if (!ret) {
+				scheduler->addTimer(
+					[this, sockfd]() { removeConnection(sockfd); return false; }, 100);
+			}
+		});
+	}
 }

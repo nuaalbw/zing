@@ -12,6 +12,8 @@
 using namespace zing;
 using namespace zing::net;
 
+constexpr char ReadBuffer::kCRLF[];
+
 ReadBuffer::ReadBuffer(uint32_t size)
 	: readIdx_(0), 
 	  writeIdx_(0)

@@ -93,7 +93,7 @@ void EventLoop::removeChannel(ChannelPtr& channel)
 
 void EventLoop::loop()
 {
-	std::lock_guard<std::mutex> locker(mutex_);
+	// std::lock_guard<std::mutex> locker(mutex_);
 
 	// 防止重复调用
 	if (running_) {

@@ -20,6 +20,9 @@ namespace net
 {
 
 using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
+using ConnectionCallback = std::function<void(TcpConnectionPtr&)>;
+using MessageCallback = std::function<
+		bool(TcpConnectionPtr, ReadBuffer& buffer)>;
 
 class TcpServer: noncopyable
 {
@@ -29,18 +32,21 @@ public:
 	explicit TcpServer(EventLoop* loop);
 	virtual ~TcpServer();
 
-	virtual bool start(std::string ip, uint16_t port);
-	virtual void stop();
+	bool start(std::string ip, uint16_t port);
+	void stop();
+
+	void setConnectionCallback(const ConnectionCallback& cb);
+	void setMessageCallback(const MessageCallback& cb);
 
 	std::string ip() const;
 	uint16_t port() const;
 
-protected:
-	virtual TcpConnectionPtr onConnection(int sockfd);
-	virtual void addConnection(int sockfd, TcpConnectionPtr conn);
-	virtual void removeConnection(int sockfd);
+private:
+	void addConnection(int sockfd, TcpConnectionPtr conn);
+	void removeConnection(int sockfd);
+	void onNewConnection(int sockfd);
 
-protected:
+private:
 	EventLoop* loop_;
 	uint16_t port_;
 	std::string ip_;
@@ -48,6 +54,8 @@ protected:
 	bool started_;
 	std::mutex mutex_;
 	std::unordered_map<int, TcpConnectionPtr> connections_;
+	ConnectionCallback connectionCallback_;
+	MessageCallback messageCallback_;
 };
 	
 } // namespace net

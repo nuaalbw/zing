@@ -7,9 +7,11 @@
 
 #include "Acceptor.h"
 #include "SocketUtil.h"
+#include "../base/Logger.h"
 
 using namespace zing;
 using namespace zing::net;
+using namespace zing::base;
 
 Acceptor::Acceptor(EventLoop* loop)
 	: loop_(loop), 
@@ -41,10 +43,12 @@ int Acceptor::listen(std::string ip, uint16_t port)
 	SocketUtil::setNonblock(sockfd);
 
 	if (!acceptSocket_->bind(ip, port)) {
+		LOG_ERROR("bind %s %d", ip.c_str(), port);
 		return -1;
 	}
 
 	if (!acceptSocket_->listen(1024)) {
+		LOG_ERROR("listen error");
 		return -1;
 	}
 
@@ -52,6 +56,7 @@ int Acceptor::listen(std::string ip, uint16_t port)
 	acceptChannel_->setReadCallback(std::bind(&Acceptor::onAccept, this));
 	acceptChannel_->enableReading();
 	loop_->updateChannel(acceptChannel_);
+	LOG_INFO("listening %s %d", ip.c_str(), port);
 
 	return 0;
 }
@@ -70,13 +75,14 @@ void Acceptor::onAccept()
 {
 	std::lock_guard<std::mutex> locker(mutex_);
 
-	int socket = acceptSocket_->getSocket();
+	int cfd = acceptSocket_->accept();
 	if (acceptSocket_ > 0) {
 		if (newConnectionCallback_) {
-			newConnectionCallback_(socket);
+			LOG_INFO("new connection: %d", cfd);
+			newConnectionCallback_(cfd);
 		}
 		else {
-			SocketUtil::close(socket);
+			SocketUtil::close(cfd);
 		}
 	}
 }

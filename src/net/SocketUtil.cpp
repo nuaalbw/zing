@@ -80,7 +80,9 @@ std::string SocketUtil::getPeerIp(int sockfd)
 	socklen_t addrLen = sizeof(addr);
 	int ret = ::getpeername(sockfd, (struct sockaddr*)&addr, &addrLen);
 	if (ret == 0) {
-		return ::inet_ntoa(addr.sin_addr);
+		char ip[48] = { 0 };
+		::inet_ntop(AF_INET, &addr.sin_addr, ip, addrLen);
+		return ip;
 	}
 	return "0.0.0.0";
 }

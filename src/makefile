@@ -3,7 +3,7 @@ LIB_SRCS2=$(wildcard net/*.cpp)
 LIB_NAME=zing
 
 CC = g++
-CFLAGS=-Wall -std=c++11
+CFLAGS=-Wall -std=c++17
 LDFLAGS=-lpthread
 
 ALL:static_lib shared_lib
