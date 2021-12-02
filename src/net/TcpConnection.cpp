@@ -75,6 +75,11 @@ void TcpConnection::send(const char* data, uint32_t size)
 	}
 }
 
+void TcpConnection::send(std::string data)
+{
+	send(data.c_str(), data.size());
+}
+
 void TcpConnection::disconnect()
 {
 	std::lock_guard<std::mutex> locker(mutex_);

@@ -44,6 +44,7 @@ public:
 	void setCloseCallback(CloseCallback cb);
 	void send(std::shared_ptr<char> data, uint32_t size);
 	void send(const char* data, uint32_t size);
+	void send(std::string data);
 	void disconnect();
 
 	bool closed() const;
