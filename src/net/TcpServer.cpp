@@ -103,9 +103,11 @@ void TcpServer::removeConnection(int sockfd)
 
 void TcpServer::onNewConnection(int sockfd)
 {
-	LOG_INFO("onNewConnection call!!!");
 	auto conn = std::make_shared<TcpConnection>(
 		loop_->getTaskScheduler().get(), sockfd);
+
+	LOG_INFO("new client - IP: %s port: %d",
+		conn->ip().c_str(), conn->port());
 
 	if (connectionCallback_) {
 		connectionCallback_(conn);

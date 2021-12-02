@@ -7,9 +7,11 @@
 
 #include "TcpConnection.h"
 #include "SocketUtil.h"
+#include "../base/Logger.h"
 
 using namespace zing;
 using namespace zing::net;
+using namespace zing::base;
 
 TcpConnection::TcpConnection(TaskScheduler* ts, int sockfd)
 	: ts_(ts), 
@@ -116,6 +118,7 @@ void TcpConnection::handleRead()
 		}
 		int ret = readBuffer_->read(fd());
 		if (ret <= 0) {
+			LOG_ERROR("handleRead error");
 			close();
 			return;
 		}
