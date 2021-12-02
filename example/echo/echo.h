@@ -5,8 +5,8 @@
 	> Created Time: Wed 01 Dec 2021 10:17:38 PM CST
  ************************************************************************/
 
-#ifndef ECHO_H
-#define ECHO_H
+#ifndef ZING_EXAMPLES_ECHO_H
+#define ZING_EXAMPLES_ECHO_H
 
 #include "EventLoop.h"
 #include "TcpServer.h"
