@@ -13,7 +13,7 @@ zing是**基于C++11**实现的一款Linux轻量级网路库，是本人在学�
 
 - 基于事件驱动的**Reactor**模式，使用**non-blocking I/O + I/O multiplexing**，程序的基本结构是一个Eventloop，以事件驱动和事件回调的方式实现业务逻辑
 - 使用基于**select**和**epoll**的IO多路复用机制，后期会加入**poll**
-- 使用C++11中的**智能指针（shared_ptr, unique_ptr, weak_ptr）**管理多线程环境下的对象资源
+- 使用C++11中的**智能指针**（shared_ptr, unique_ptr, weak_ptr）管理多线程环境下的对象资源
 - 基于**RAII**机制，使用C++11中的**std::lock_guard**和**std::unique_lock**，通过建立**栈上对象**的方式，管理std::mutex资源
 - 使用C++11中的**std::bind**，**std::function**和**lambda表达式**，实现了设置函数回调、任务添加等功能
 - 基于**单例模式**实现的**日志库**，使用printf(fmt, ...)的风格输出日志，支持设置多种level和目的地，可以设置**运行时过滤器（filter）**，控制不同组件的消息级别和目的地
