@@ -41,16 +41,16 @@ make
 class EchoServer
 {
 public:
-	EchoServer(zing::net::EventLoop* loop);
-	void start(std::string ip, uint16_t port);
+    EchoServer(zing::net::EventLoop* loop);
+    void start(std::string ip, uint16_t port);
 
 private:
-	void onConnection(zing::net::TcpConnectionPtr conn);
-	bool onMessage(zing::net::TcpConnectionPtr conn,
+    void onConnection(zing::net::TcpConnectionPtr conn);
+    bool onMessage(zing::net::TcpConnectionPtr conn,
                    zing::net::ReadBuffer& buffer);
 
 private:
-	zing::net::TcpServer server_;
+    zing::net::TcpServer server_;
 };
 
 #endif
@@ -70,31 +70,31 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 EchoServer::EchoServer(zing::net::EventLoop* loop)
-	: server_(loop)
+    : server_(loop)
 {
-	server_.setConnectionCallback(
-		std::bind(&EchoServer::onConnection, this, _1));
-	server_.setMessageCallback(
-		std::bind(&EchoServer::onMessage, this, _1, _2));
+    server_.setConnectionCallback(
+	std::bind(&EchoServer::onConnection, this, _1));
+    server_.setMessageCallback(
+	std::bind(&EchoServer::onMessage, this, _1, _2));
 }
 
 void EchoServer::start(std::string ip, uint16_t port)
 {
-	server_.start(ip, port);
+    server_.start(ip, port);
 }
 
 void EchoServer::onConnection(zing::net::TcpConnectionPtr conn)
 {
-	LOG_INFO("EchoServer - ip<%s> port<%d>", conn->ip().c_str(), conn->port());
+    LOG_INFO("EchoServer - ip<%s> port<%d>", conn->ip().c_str(), conn->port());
 }
 
 bool EchoServer::onMessage(zing::net::TcpConnectionPtr conn,
-                   zing::net::ReadBuffer& buffer)
+                           zing::net::ReadBuffer& buffer)
 {
-	std::string res(buffer.peek(), buffer.readableBytes());
-	buffer.retrieveAll();
-	conn->send(res.c_str(), res.size());
-	return true;
+    std::string res(buffer.peek(), buffer.readableBytes());
+    buffer.retrieveAll();
+    conn->send(res.c_str(), res.size());
+    return true;
 }
 ```
 
@@ -108,10 +108,10 @@ using namespace zing::net;
 
 int main()
 {
-	EventLoop loop;
-	EchoServer server(&loop);
-	server.start("127.0.0.1", 12345);
-	loop.loop();
+    EventLoop loop;
+    EchoServer server(&loop);
+    server.start("127.0.0.1", 12345);
+    loop.loop();
 }
 ```
 
