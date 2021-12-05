@@ -121,9 +121,10 @@ void TcpConnection::handleRead()
 		if (closed_) {
 			return;
 		}
-		int ret = readBuffer_->read(fd());
+		int savedErrno = 0;
+		int ret = readBuffer_->readFd(fd(), &savedErrno);
 		if (ret <= 0) {
-			LOG_ERROR("handleRead error");
+			LOG_ERROR("handleRead");
 			close();
 			return;
 		}

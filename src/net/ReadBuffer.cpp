@@ -7,6 +7,7 @@
 
 #include "ReadBuffer.h"
 #include "SocketFiles.h"
+#include "assert.h"
 #include <algorithm>
 
 using namespace zing;
@@ -15,10 +16,10 @@ using namespace zing::net;
 constexpr char ReadBuffer::kCRLF[];
 
 ReadBuffer::ReadBuffer(uint32_t size)
-	: readIdx_(0), 
-	  writeIdx_(0)
+	: readIdx_(kCheapPrepend), 
+	  writeIdx_(kCheapPrepend)
 {
-	buffer_.resize(size);
+	buffer_.resize(kCheapPrepend + size);
 }
 
 ReadBuffer::~ReadBuffer()
@@ -33,6 +34,11 @@ uint32_t ReadBuffer::readableBytes() const
 uint32_t ReadBuffer::writeableBytes() const
 {
 	return (uint32_t)(buffer_.size() - writeIdx_);
+}
+
+uint32_t ReadBuffer::prependableBytes() const
+{
+	return (uint32_t)readIdx_;
 }
 
 uint32_t ReadBuffer::size() const
@@ -71,8 +77,8 @@ const char* ReadBuffer::findLastCrlfCrlf() const
 
 void ReadBuffer::retrieveAll()
 {
-	writeIdx_ = 0;
-	readIdx_ = 0;
+	writeIdx_ = kCheapPrepend;
+	readIdx_ = kCheapPrepend;
 }
 
 void ReadBuffer::retrieve(size_t len)
@@ -80,8 +86,8 @@ void ReadBuffer::retrieve(size_t len)
 	if (len <= readableBytes()) {
 		readIdx_ += len;
 		if (readIdx_ == writeIdx_) {
-			readIdx_ = 0;
-			writeIdx_ = 0;
+			readIdx_ = kCheapPrepend;
+			writeIdx_ = kCheapPrepend;
 		}
 	}
 	else {
@@ -94,23 +100,30 @@ void ReadBuffer::retrieveUntil(const char* end)
 	retrieve(end - peek());
 }
 
-int ReadBuffer::read(int sockfd)
+int ReadBuffer::readFd(int sockfd, int* savedErrno)
 {
-	uint32_t size = writeableBytes();
-	if (size < MAX_BYTES_PER_READ) {
-		uint32_t readBufferSize = (uint32_t)buffer_.size();
-		if (readBufferSize > MAX_BUFFER_SIZE) {
-			return 0;
-		}
-		buffer_.resize(readBufferSize + MAX_BYTES_PER_READ);
+	char extrabuf[65536] = { 0 };
+	struct iovec vec[2];
+	const uint32_t writable = writeableBytes();
+	vec[0].iov_base = begin() + writeIdx_;
+	vec[0].iov_len = writable;
+	vec[1].iov_base = extrabuf;
+	vec[1].iov_len = sizeof(extrabuf);
+
+	const int iovcnt = (writable < sizeof(extrabuf)) ? 2 : 1;
+	const ssize_t n = ::readv(sockfd, vec, iovcnt);
+	if (n < 0) {
+		*savedErrno = errno;
+	}
+	else if (static_cast<uint32_t>(n) <= writable) {
+		writeIdx_ += n;
+	}
+	else {
+		writeIdx_ = buffer_.size();
+		append(extrabuf, n - writable);
 	}
 
-	int bytesRead = ::recv(sockfd, beginWrite(), MAX_BYTES_PER_READ, 0);
-	if (bytesRead > 0) {
-		writeIdx_ += bytesRead;
-	}
-
-	return bytesRead;
+	return n;
 }
 
 uint32_t ReadBuffer::readAll(std::string& data)
@@ -118,8 +131,8 @@ uint32_t ReadBuffer::readAll(std::string& data)
 	uint32_t size = readableBytes();
 	if (size > 0) {
 		data.assign(peek(), size);
-		writeIdx_ = 0;
-		readIdx_ = 0;
+		writeIdx_ = kCheapPrepend;
+		readIdx_ = kCheapPrepend;
 	}
 
 	return size;
@@ -157,4 +170,44 @@ char* ReadBuffer::beginWrite()
 const char* ReadBuffer::beginWrite() const
 {
 	return begin() + writeIdx_;
+}
+
+void ReadBuffer::append(const char* data, size_t len)
+{
+	if (writeableBytes() < len) {
+		makeSpace(len);
+	}
+	assert(writeableBytes() >= len);
+
+	std::copy(data, data + len, beginWrite());
+	assert(len <= writeableBytes());
+	writeIdx_ += len;
+}
+
+void ReadBuffer::append(const void* data, size_t len)
+{
+	append(static_cast<const char*>(data), len);
+}
+
+void ReadBuffer::append(const std::string str)
+{
+	append(str.data(), str.size());
+}
+
+void ReadBuffer::makeSpace(size_t len)
+{
+	if (writeableBytes() + prependableBytes() < len + kCheapPrepend) {
+		buffer_.resize(writeIdx_ + len);
+	}
+	else {
+		// move readble data to the front, make space inside buffer
+		assert(kCheapPrepend < readIdx_);
+		uint32_t readable = readableBytes();
+		std::copy(begin() + readIdx_, 
+				  begin() + writeIdx_, 
+				  begin() + kCheapPrepend);
+		readIdx_ = kCheapPrepend;
+		writeIdx_ = readIdx_ + readable;
+		assert(readable == readableBytes());
+	}
 }

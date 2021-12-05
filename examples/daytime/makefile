@@ -2,7 +2,7 @@ BIN_TARGET = daytime
 CC = g++
 SRCS=$(wildcard *.cpp)
 CFLAGS = -Wall -g
-LDFLAGS = -L../../src -I../../src/net -I../../src/base -lzing -lpthread
+LDFLAGS = -L../../src/libs -I../../src/net -I../../src/base -lzing -lpthread
 
 ALL:$(BIN_TARGET)
 

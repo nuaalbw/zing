@@ -21,11 +21,13 @@ namespace net
 class ReadBuffer: noncopyable
 {
 public:
+	static constexpr int kCheapPrepend = 8;	// 预留8字节首部
 	explicit ReadBuffer(uint32_t size = 2048);	
 	virtual ~ReadBuffer();
 	
 	uint32_t readableBytes() const;		// 可读字节数
 	uint32_t writeableBytes() const;	// 可写字节数
+	uint32_t prependableBytes() const;	
 	uint32_t size() const;
 
 	char* peek();
@@ -39,15 +41,20 @@ public:
 	void retrieve(size_t len);
 	void retrieveUntil(const char* end);
 
-	int read(int sockfd);
+	int readFd(int sockfd, int* savedErrno);
 	uint32_t readAll(std::string& data);
 	uint32_t readUntilCrlf(std::string& data);
+
+	void append(const char* data, size_t len);
+	void append(const void* data, size_t len);
+	void append(const std::string str);
 
 private:
 	char* begin();
 	const char* begin() const;
 	char* beginWrite();
 	const char* beginWrite() const;
+	void makeSpace(size_t len);
 
 private:
 	std::vector<char> buffer_;
