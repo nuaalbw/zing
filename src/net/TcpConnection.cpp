@@ -80,6 +80,11 @@ void TcpConnection::send(std::string data)
 	send(data.c_str(), data.size());
 }
 
+void TcpConnection::send(const zing::net::ReadBuffer& buffer)
+{
+	send(buffer.peek(), buffer.readableBytes());
+}
+
 void TcpConnection::disconnect()
 {
 	std::lock_guard<std::mutex> locker(mutex_);

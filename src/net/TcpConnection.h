@@ -45,6 +45,7 @@ public:
 	void send(std::shared_ptr<char> data, uint32_t size);
 	void send(const char* data, uint32_t size);
 	void send(std::string data);
+	void send(const zing::net::ReadBuffer& buffer);
 	void disconnect();
 
 	bool closed() const;
