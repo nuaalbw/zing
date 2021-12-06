@@ -7,6 +7,7 @@
 
 #include "ReadBuffer.h"
 #include "SocketFiles.h"
+#include "SocketUtil.h"
 #include "assert.h"
 #include <algorithm>
 
@@ -210,4 +211,137 @@ void ReadBuffer::makeSpace(size_t len)
 		writeIdx_ = readIdx_ + readable;
 		assert(readable == readableBytes());
 	}
+}
+
+void ReadBuffer::retrieveInt64()
+{
+	retrieve(sizeof(int64_t));
+}
+
+void ReadBuffer::retrieveInt32()
+{
+	retrieve(sizeof(int32_t));
+}
+
+void ReadBuffer::retrieveInt16()
+{
+	retrieve(sizeof(int16_t));
+}
+
+void ReadBuffer::retrieveInt8()
+{
+	retrieve(sizeof(int8_t));
+}
+
+void ReadBuffer::appendInt64(int64_t x)
+{
+	int64_t be64 = SocketUtil::hostToNetwork64(x);
+	append(&be64, sizeof(be64));
+}
+
+void ReadBuffer::appendInt32(int32_t x)
+{
+	int32_t be32 = SocketUtil::hostToNetwork32(x);
+	append(&be32, sizeof(be32));
+}
+
+void ReadBuffer::appendInt16(int16_t x)
+{
+	int16_t be16 = SocketUtil::hostToNetwork16(x);
+	append(&be16, sizeof(be16));
+}
+
+void ReadBuffer::appendInt8(int8_t x)
+{
+	append(&x, sizeof(x));
+}
+
+int64_t ReadBuffer::readInt64()
+{
+	int64_t result = peekInt64();
+	retrieveInt64();
+	return result;
+}
+
+int32_t ReadBuffer::readInt32()
+{
+	int32_t result = peekInt32();
+	retrieveInt32();
+	return result;
+}
+
+int16_t ReadBuffer::readInt16()
+{
+	int16_t result = peekInt16();
+	retrieveInt16();
+	return result;
+}
+
+int8_t ReadBuffer::readInt8()
+{
+	int8_t result = peekInt8();
+	retrieveInt8();
+	return result;
+}
+
+int64_t ReadBuffer::peekInt64()
+{
+	assert(readableBytes() >= sizeof(int64_t));
+	int64_t be64 = 0;
+	::memcpy(&be64, peek(), sizeof(be64));
+	return SocketUtil::networkToHost64(be64);
+}
+
+int32_t ReadBuffer::peekInt32()
+{
+	assert(readableBytes() >= sizeof(int32_t));
+	int32_t be32 = 0;
+	::memcpy(&be32, peek(), sizeof(be32));
+	return SocketUtil::networkToHost32(be32);
+}
+
+int16_t ReadBuffer::peekInt16()
+{
+	assert(readableBytes() >= sizeof(int16_t));
+	int16_t be16 = 0;
+	::memcpy(&be16, peek(), sizeof(be16));
+	return SocketUtil::networkToHost16(be16);
+}
+
+int8_t ReadBuffer::peekInt8()
+{
+	assert(readableBytes() >= sizeof(int8_t));
+	int8_t x = *peek();
+	return x;
+}
+
+void ReadBuffer::prependInt64(int64_t x)
+{
+	int64_t be64 = SocketUtil::hostToNetwork64(x);
+	prepend(&be64, sizeof(be64));
+}
+
+void ReadBuffer::prependInt32(int32_t x)
+{
+	int32_t be32 = SocketUtil::hostToNetwork32(x);
+	prepend(&be32, sizeof(be32));
+}
+
+void ReadBuffer::prependInt16(int16_t x)
+{
+	int16_t be16 = SocketUtil::hostToNetwork16(x);
+	prepend(&be16, sizeof(be16));
+}
+
+void ReadBuffer::prependInt8(int8_t x)
+{
+	prepend(&x, sizeof(x));
+}
+
+void ReadBuffer::prepend(const void* data, size_t len)
+{
+	assert(len <= prependableBytes());
+	readIdx_ -= len;
+	const char* d = static_cast<const char*>(data);
+	std::copy(d, d + len, begin() + readIdx_);
 }

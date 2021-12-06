@@ -49,6 +49,13 @@ public:
 	static void close(int sockfd);
 	// 发起连接
 	static bool connect(int sockfd, std::string ip, uint16_t port, int timeout = 0);
+	// 字节序转换
+	static uint64_t hostToNetwork64(uint64_t host64);
+	static uint32_t hostToNetwork32(uint32_t host32);
+	static uint16_t hostToNetwork16(uint16_t host16);
+	static uint64_t networkToHost64(uint64_t net64);
+	static uint32_t networkToHost32(uint32_t net32);
+	static uint16_t networkToHost16(uint16_t net16);
 };
 
 } // namespace net

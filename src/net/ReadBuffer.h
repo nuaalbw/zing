@@ -41,6 +41,11 @@ public:
 	void retrieve(size_t len);
 	void retrieveUntil(const char* end);
 
+	void retrieveInt64();
+	void retrieveInt32();
+	void retrieveInt16();
+	void retrieveInt8();
+
 	int readFd(int sockfd, int* savedErrno);
 	uint32_t readAll(std::string& data);
 	uint32_t readUntilCrlf(std::string& data);
@@ -48,6 +53,31 @@ public:
 	void append(const char* data, size_t len);
 	void append(const void* data, size_t len);
 	void append(const std::string str);
+
+	// append intxx_t using network endian
+	void appendInt64(int64_t x);
+	void appendInt32(int32_t x);
+	void appendInt16(int16_t x);
+	void appendInt8(int8_t x);
+
+	// read intxx_t from network endian
+	int64_t readInt64();
+	int32_t readInt32();
+	int16_t readInt16();
+	int8_t readInt8();
+
+	// peek int64_t from network endian
+	int64_t peekInt64();
+	int32_t peekInt32();
+	int16_t peekInt16();
+	int8_t peekInt8();
+
+	// prepend intxx_t using network endian
+	void prependInt64(int64_t x);
+	void prependInt32(int32_t x);
+	void prependInt16(int16_t x);
+	void prependInt8(int8_t x);
+	void prepend(const void* data, size_t len);
 
 private:
 	char* begin();
