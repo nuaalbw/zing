@@ -21,6 +21,7 @@ namespace net
 
 using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
 using ConnectionCallback = std::function<void(TcpConnectionPtr&)>;
+using DisconnectionCallback = std::function<void(TcpConnectionPtr&)>;
 using MessageCallback = std::function<
 		bool(TcpConnectionPtr, ReadBuffer& buffer)>;
 
@@ -36,6 +37,7 @@ public:
 	void stop();
 
 	void setConnectionCallback(const ConnectionCallback& cb);
+	void setDisconnectionCallback(const DisconnectionCallback& cb);
 	void setMessageCallback(const MessageCallback& cb);
 
 	std::string ip() const;
@@ -56,6 +58,7 @@ private:
 	std::unordered_map<int, TcpConnectionPtr> connections_;
 	ConnectionCallback connectionCallback_;
 	MessageCallback messageCallback_;
+	DisconnectionCallback disconnectionCallback_;
 };
 	
 } // namespace net

@@ -72,6 +72,11 @@ void TcpServer::setConnectionCallback(const ConnectionCallback& cb)
 	connectionCallback_ = cb;
 }
 
+void TcpServer::setDisconnectionCallback(const DisconnectionCallback& cb)
+{
+	disconnectionCallback_ = cb;
+}
+
 void TcpServer::setMessageCallback(const MessageCallback& cb)
 {
 	messageCallback_ = cb;
@@ -127,6 +132,9 @@ void TcpServer::onNewConnection(int sockfd)
 			if (!ret) {
 				scheduler->addTimer(
 					[this, sockfd]() { removeConnection(sockfd); return false; }, 100);
+			}
+			if (disconnectionCallback_) {
+				disconnectionCallback_(conn);
 			}
 		});
 	}

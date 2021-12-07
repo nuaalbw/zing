@@ -128,8 +128,12 @@ void TcpConnection::handleRead()
 		}
 		int savedErrno = 0;
 		int ret = readBuffer_->readFd(fd(), &savedErrno);
-		if (ret <= 0) {
+		if (ret < 0) {
 			LOG_ERROR("handleRead");
+			close();
+			return;
+		}
+		else if (ret == 0) {
 			close();
 			return;
 		}
