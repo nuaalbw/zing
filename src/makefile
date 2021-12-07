@@ -18,7 +18,7 @@ shared_lib:$(LIB_SRCS1) $(LIB_SRCS2)
 	$(CC) -fPIC -shared $^ -o lib$(LIB_NAME).so
 
 clean:
-	rm -rf $(LIB_PATH)
+	rm -rf $(LIB_PATH) *.o
 
 install:
 	mkdir $(LIB_PATH)
