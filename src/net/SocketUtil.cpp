@@ -6,9 +6,11 @@
  ************************************************************************/
 
 #include "SocketUtil.h"
+#include "../base/Logger.h"
 
 using namespace zing;
 using namespace zing::net;
+using namespace zing::base;
 
 bool SocketUtil::bind(int sockfd, std::string ip, uint16_t port)
 {
@@ -193,4 +195,44 @@ uint32_t SocketUtil::networkToHost32(uint32_t net32)
 uint16_t SocketUtil::networkToHost16(uint16_t net16)
 {
 	return be16toh(net16);
+}
+
+int SocketUtil::createNonblockingOrDie()
+{
+	int sockfd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
+	if (sockfd < 0) {
+		LOG_ERROR("sockets::createNonblockingOrDie");
+	}
+	return sockfd;
+}
+
+int SocketUtil::getSocketError(int sockfd)
+{
+	int optval;
+	socklen_t optlen = static_cast<socklen_t>(sizeof(optval));
+
+	if (::getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &optval, &optlen) < 0) {
+		return errno;
+	}
+	else {
+		return optval;
+	}
+}
+
+bool SocketUtil::isSelfConnect(int sockfd)
+{
+	struct sockaddr_in* laddr = nullptr, *raddr = nullptr;
+	int ret = SocketUtil::getSocketAddr(sockfd, laddr);
+	if (ret == -1) {
+		LOG_WARNING("getSocketAddr error");
+		return false;
+	}
+	ret = SocketUtil::getPeerAddr(sockfd, raddr);
+	if (ret == -1) {
+		LOG_WARNING("getPeerAddr error");
+		return false;
+	}
+
+	return laddr->sin_port == raddr->sin_port && 
+		   laddr->sin_addr.s_addr == raddr->sin_addr.s_addr;
 }

@@ -56,6 +56,11 @@ public:
 	static uint64_t networkToHost64(uint64_t net64);
 	static uint32_t networkToHost32(uint32_t net32);
 	static uint16_t networkToHost16(uint16_t net16);
+	// Creates a non-blocking socket file descriptor, abort if any error
+	static int createNonblockingOrDie();
+	static int getSocketError(int sockfd);
+	// 判断是否发生自连接
+	static bool isSelfConnect(int sockfd);
 };
 
 } // namespace net
