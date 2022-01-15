@@ -5,7 +5,7 @@ project(zing C CXX)
 enable_testing()
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
+  set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
 # only build examples if this is the main project
@@ -31,6 +31,7 @@ set(CXX_FLAGS
  -march=native
  # -MMD
  -std=c++11
+ -pthread
  -rdynamic
  )
 if(CMAKE_BUILD_BITS EQUAL 32)

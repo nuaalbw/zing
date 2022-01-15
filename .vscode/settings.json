@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "thread": "cpp"
+        "*.py": "python",
+        "thread": "cpp",
+        "atomic": "cpp"
     }
 }

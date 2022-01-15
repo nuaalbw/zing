@@ -1,8 +1,8 @@
 # add_executable(asynclogging_test AsyncLogging_test.cc)
 # target_link_libraries(asynclogging_test muduo_base)
 
-# add_executable(atomic_unittest Atomic_unittest.cc)
-# add_test(NAME atomic_unittest COMMAND atomic_unittest)
+add_executable(atomic_unittest Atomic_unittest.cpp)
+add_test(NAME atomic_unittest COMMAND atomic_unittest)
 
 # add_executable(blockingqueue_test BlockingQueue_test.cc)
 # target_link_libraries(blockingqueue_test muduo_base)
