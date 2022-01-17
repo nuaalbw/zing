@@ -2,9 +2,9 @@ set(base_SRCS
   # AsyncLogging.cc
   # Condition.cc
   # CountDownLatch.cc
-  # CurrentThread.cc
+  CurrentThread.cpp
   # Date.cc
-  # Exception.cc
+  Exception.cpp
   # FileUtil.cc
   # LogFile.cc
   # Logging.cc
