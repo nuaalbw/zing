@@ -21,9 +21,9 @@ add_test(NAME atomic_unittest COMMAND atomic_unittest)
 # target_link_libraries(date_unittest muduo_base)
 # add_test(NAME date_unittest COMMAND date_unittest)
 
-# add_executable(exception_test Exception_test.cc)
-# target_link_libraries(exception_test muduo_base)
-# add_test(NAME exception_test COMMAND exception_test)
+add_executable(exception_test Exception_test.cpp)
+target_link_libraries(exception_test zing_base)
+add_test(NAME exception_test COMMAND exception_test)
 
 # add_executable(fileutil_test FileUtil_test.cc)
 # target_link_libraries(fileutil_test muduo_base)
@@ -53,8 +53,11 @@ add_test(NAME atomic_unittest COMMAND atomic_unittest)
 # add_test(NAME logstream_test COMMAND logstream_test)
 # endif()
 
-# add_executable(mutex_test Mutex_test.cc)
-# target_link_libraries(mutex_test muduo_base)
+add_executable(mutex_test Mutex_test.cpp)
+target_link_libraries(mutex_test zing_base)
+
+add_executable(condition_unittest Condition_unittest.cpp)
+target_link_libraries(condition_unittest zing_base)
 
 # add_executable(processinfo_test ProcessInfo_test.cc)
 # target_link_libraries(processinfo_test muduo_base)

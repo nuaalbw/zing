@@ -10,6 +10,13 @@
 
 #include "Types.h"
 
+// 临时
+#include <unistd.h>
+#include <sys/prctl.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <linux/unistd.h>
+
 namespace zing
 {
 namespace CurrentThread
@@ -23,7 +30,14 @@ extern __thread char t_tidString[32];
 extern __thread int t_tidStringLength;
 extern __thread	const char* t_threadName;
 
-void cachedTid();
+inline void cachedTid()
+{
+ 	if (t_cachedTid == 0)
+  {
+    t_cachedTid = static_cast<pid_t>(::syscall(SYS_gettid));
+    t_tidStringLength = snprintf(t_tidString, sizeof t_tidString, "%5d ", t_cachedTid);
+  }
+}
 
 inline int tid()
 {
