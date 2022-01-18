@@ -30,20 +30,13 @@ extern __thread char t_tidString[32];
 extern __thread int t_tidStringLength;
 extern __thread	const char* t_threadName;
 
-inline void cachedTid()
-{
- 	if (t_cachedTid == 0)
-  {
-    t_cachedTid = static_cast<pid_t>(::syscall(SYS_gettid));
-    t_tidStringLength = snprintf(t_tidString, sizeof t_tidString, "%5d ", t_cachedTid);
-  }
-}
+void cacheTid();
 
 inline int tid()
 {
 	if (__builtin_expect(t_cachedTid == 0, 0))
 	{
-		cachedTid();
+		cacheTid();
 	}
 	return t_cachedTid;
 }

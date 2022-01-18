@@ -1,6 +1,6 @@
 set(base_SRCS
   # AsyncLogging.cc
-  # CountDownLatch.cc
+  CountDownLatch.cpp
   CurrentThread.cpp
   # Date.cc
   Exception.cpp
@@ -10,7 +10,7 @@ set(base_SRCS
   # LogStream.cc
   # ProcessInfo.cc
   Timestamp.cpp
-  # Thread.cc
+  Thread.cpp
   # ThreadPool.cc
   # TimeZone.cc
   )

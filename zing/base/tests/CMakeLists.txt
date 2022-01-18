@@ -71,8 +71,8 @@ target_link_libraries(condition_unittest zing_base)
 # add_executable(thread_bench Thread_bench.cc)
 # target_link_libraries(thread_bench muduo_base)
 
-# add_executable(thread_test Thread_test.cc)
-# target_link_libraries(thread_test muduo_base)
+add_executable(thread_test Thread_test.cpp)
+target_link_libraries(thread_test zing_base)
 
 # add_executable(threadlocal_test ThreadLocal_test.cc)
 # target_link_libraries(threadlocal_test muduo_base)
