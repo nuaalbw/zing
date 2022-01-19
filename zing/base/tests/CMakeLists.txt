@@ -4,8 +4,8 @@
 add_executable(atomic_unittest Atomic_unittest.cpp)
 add_test(NAME atomic_unittest COMMAND atomic_unittest)
 
-# add_executable(blockingqueue_test BlockingQueue_test.cc)
-# target_link_libraries(blockingqueue_test muduo_base)
+add_executable(blockingqueue_test BlockingQueue_test.cpp)
+target_link_libraries(blockingqueue_test zing_base)
 
 # add_executable(blockingqueue_bench BlockingQueue_bench.cc)
 # target_link_libraries(blockingqueue_bench muduo_base)
@@ -14,8 +14,8 @@ add_test(NAME atomic_unittest COMMAND atomic_unittest)
 # target_link_libraries(blockingqueue_bench2 muduo_base)
 # # set_target_properties(blockingqueue_bench2 PROPERTIES COMPILE_FLAGS "-std=c++17")
 
-# add_executable(boundedblockingqueue_test BoundedBlockingQueue_test.cc)
-# target_link_libraries(boundedblockingqueue_test muduo_base)
+add_executable(boundedblockingqueue_test BoundedBlockingQueue_test.cpp)
+target_link_libraries(boundedblockingqueue_test zing_base)
 
 # add_executable(date_unittest Date_unittest.cc)
 # target_link_libraries(date_unittest muduo_base)
@@ -80,8 +80,8 @@ target_link_libraries(thread_test zing_base)
 # add_executable(threadlocalsingleton_test ThreadLocalSingleton_test.cc)
 # target_link_libraries(threadlocalsingleton_test muduo_base)
 
-# add_executable(threadpool_test ThreadPool_test.cc)
-# target_link_libraries(threadpool_test muduo_base)
+add_executable(threadpool_test ThreadPool_test.cpp)
+target_link_libraries(threadpool_test zing_base)
 
 add_executable(timestamp_unittest Timestamp_unittest.cpp)
 target_link_libraries(timestamp_unittest zing_base)

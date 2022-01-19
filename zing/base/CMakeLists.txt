@@ -11,7 +11,7 @@ set(base_SRCS
   # ProcessInfo.cc
   Timestamp.cpp
   Thread.cpp
-  # ThreadPool.cc
+  ThreadPool.cpp
   # TimeZone.cc
   )
 
