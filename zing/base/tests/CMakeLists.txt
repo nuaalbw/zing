@@ -65,8 +65,8 @@ target_link_libraries(condition_unittest zing_base)
 add_executable(singleton_test Singleton_test.cpp)
 target_link_libraries(singleton_test zing_base)
 
-# add_executable(singleton_threadlocal_test SingletonThreadLocal_test.cc)
-# target_link_libraries(singleton_threadlocal_test muduo_base)
+add_executable(singleton_threadlocal_test SingletonThreadLocal_test.cpp)
+target_link_libraries(singleton_threadlocal_test zing_base)
 
 # add_executable(thread_bench Thread_bench.cc)
 # target_link_libraries(thread_bench muduo_base)
