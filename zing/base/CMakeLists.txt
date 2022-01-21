@@ -7,7 +7,7 @@ set(base_SRCS
   # FileUtil.cc
   # LogFile.cc
   # Logging.cc
-  # LogStream.cc
+  LogStream.cpp
   # ProcessInfo.cc
   Timestamp.cpp
   Thread.cpp
