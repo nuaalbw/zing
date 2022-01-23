@@ -2,6 +2,11 @@
     "files.associations": {
         "*.py": "python",
         "thread": "cpp",
-        "atomic": "cpp"
+        "atomic": "cpp",
+        "strstream": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp"
     }
 }

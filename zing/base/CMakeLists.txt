@@ -2,17 +2,17 @@ set(base_SRCS
   # AsyncLogging.cc
   CountDownLatch.cpp
   CurrentThread.cpp
-  # Date.cc
+  Date.cpp
   Exception.cpp
   # FileUtil.cc
   # LogFile.cc
-  # Logging.cc
+  Logging.cpp
   LogStream.cpp
   # ProcessInfo.cc
   Timestamp.cpp
   Thread.cpp
   ThreadPool.cpp
-  # TimeZone.cc
+  TimeZone.cpp
   )
 
 add_library(zing_base ${base_SRCS})

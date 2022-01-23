@@ -23,7 +23,8 @@ public:
 	TimeZone(int eastOfUtc, const char* tzname);	// a fixed timezone
 	TimeZone() = default;	// an invalid timezone
 
-	bool valid() const;
+	bool valid() const
+	{ return static_cast<bool>(data_); }
 
 	struct tm toLocalTime(time_t secondsSinceEpoch) const;
 	time_t fromLocalTime(const struct tm&) const;
