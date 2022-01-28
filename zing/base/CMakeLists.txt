@@ -4,11 +4,11 @@ set(base_SRCS
   CurrentThread.cpp
   Date.cpp
   Exception.cpp
-  # FileUtil.cc
-  # LogFile.cc
+  FileUtil.cpp
+  LogFile.cpp
   Logging.cpp
   LogStream.cpp
-  # ProcessInfo.cc
+  ProcessInfo.cpp
   Timestamp.cpp
   Thread.cpp
   ThreadPool.cpp

@@ -72,7 +72,7 @@ public:
 
 	LogStream& stream() { return impl_.stream_; }
 
-	static LogLevel loglevel();
+	static LogLevel logLevel();
 	static void setLogLevel(LogLevel level);
 
 	using OutputFunc = std::function<void(const char*, int)>;
@@ -102,7 +102,7 @@ private:
 
 extern Logger::LogLevel g_logLevel;
 
-inline Logger::LogLevel Logger::loglevel()
+inline Logger::LogLevel Logger::logLevel()
 {
 	return g_logLevel;
 }

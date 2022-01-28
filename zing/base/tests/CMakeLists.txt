@@ -41,8 +41,8 @@ add_test(NAME exception_test COMMAND exception_test)
 # add_executable(logfile_test LogFile_test.cc)
 # target_link_libraries(logfile_test muduo_base)
 
-# add_executable(logging_test Logging_test.cc)
-# target_link_libraries(logging_test muduo_base)
+add_executable(logging_test Logging_test.cpp)
+target_link_libraries(logging_test zing_base)
 
 add_executable(logstream_bench LogStream_bench.cpp)
 target_link_libraries(logstream_bench zing_base)
