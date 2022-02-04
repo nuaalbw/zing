@@ -35,8 +35,16 @@ EventLoop* EventLoop::getEventLoopOfCurrentThread()
 
 EventLoop::EventLoop()
 	: looping_(false), 
+		quit_(false), 
+		eventHandling_(false), 
+		callingPendingFunctors_(false), 
+		iteration_(0), 
 		threadId_(CurrentThread::tid()),
-		poller_(Poller::newDefaultPoller(this))
+		poller_(Poller::newDefaultPoller(this)), 
+		// timerQueue_(new TimerQueue(this)), 
+		// wakeupFd_(createEventfd()), 
+		// wakeupChannel_(new Channel(this, wakeupFd_)), 
+		currentActiveChannel_(nullptr)
 {
 	LOG_DEBUG << "EventLoop created " << this << " in thread " << threadId_;
 	if (t_loopInThisThread)
