@@ -25,6 +25,7 @@ using namespace zing::net;
 namespace
 {
 __thread EventLoop* t_loopInThisThread = nullptr;	// one loop per thread
+const int kPollTimeMs = 10000;
 	
 } // namespace
 
@@ -71,7 +72,26 @@ void EventLoop::loop()
 	assertInLoopThread();
 	looping_ = true;
 	LOG_TRACE << "EventLoop " << this << " start looping";
-	::poll(nullptr, 0, 5 * 1000);
+
+	while (!quit_)
+	{
+		activeChannels_.clear();
+		pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_);
+		++iteration_;
+		if (Logger::logLevel() <= Logger::TRACE)
+		{
+			// printActiveChannels();
+		}
+		eventHandling_ = true;
+		for (Channel* channel: activeChannels_)
+		{
+			currentActiveChannel_ = channel;
+			currentActiveChannel_->handleEvent(pollReturnTime_);
+		}
+		currentActiveChannel_ = nullptr;
+		eventHandling_ = false;
+		// doPendingFunctors();
+	}
 
 	LOG_TRACE << "EventLoop " << this << " stop looping";
 	looping_ = false;
