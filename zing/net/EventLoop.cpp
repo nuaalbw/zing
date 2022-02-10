@@ -11,6 +11,8 @@
 #include "../base/Mutex.h"
 #include "Channel.h"
 #include "Poller.h"
+#include "SocketsOps.h"
+#include "TimerQueue.h"
 
 #include <algorithm>
 #include <signal.h>
@@ -27,6 +29,30 @@ namespace
 __thread EventLoop* t_loopInThisThread = nullptr;	// one loop per thread
 const int kPollTimeMs = 10000;
 	
+int createEventfd()
+{
+  int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+  if (evtfd < 0)
+  {
+    LOG_SYSERR << "Failed in eventfd";
+    abort();
+  }
+  return evtfd;
+}
+
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+class IgnoreSigPipe
+{
+ public:
+  IgnoreSigPipe()
+  {
+    ::signal(SIGPIPE, SIG_IGN);
+    // LOG_TRACE << "Ignore SIGPIPE";
+  }
+};
+#pragma GCC diagnostic error "-Wold-style-cast"
+
+IgnoreSigPipe initObj;
 } // namespace
 
 EventLoop* EventLoop::getEventLoopOfCurrentThread()
@@ -43,8 +69,8 @@ EventLoop::EventLoop()
 		threadId_(CurrentThread::tid()),
 		poller_(Poller::newDefaultPoller(this)), 
 		// timerQueue_(new TimerQueue(this)), 
-		// wakeupFd_(createEventfd()), 
-		// wakeupChannel_(new Channel(this, wakeupFd_)), 
+		wakeupFd_(createEventfd()), 
+		wakeupChannel_(new Channel(this, wakeupFd_)), 
 		currentActiveChannel_(nullptr)
 {
 	LOG_DEBUG << "EventLoop created " << this << " in thread " << threadId_;
@@ -62,7 +88,7 @@ EventLoop::EventLoop()
 EventLoop::~EventLoop()
 {
 	LOG_DEBUG << "EventLoop " << this << " of thread " << threadId_
-						<< "destructss in thread " << CurrentThread::tid();
+						<< " destructs in thread " << CurrentThread::tid();
 	t_loopInThisThread = nullptr;
 }
 
@@ -97,6 +123,46 @@ void EventLoop::loop()
 	looping_ = false;
 }
 
+void EventLoop::quit()
+{
+	quit_ = true;
+	if (!isInLoopThread())
+	{
+		wakeup();
+	}
+}
+
+void EventLoop::runInLoop(Functor cb)
+{
+	if (isInLoopThread())
+	{
+		cb();
+	}
+	else
+	{
+		queueInLoop(std::move(cb));
+	}
+}
+
+void EventLoop::queueInLoop(Functor cb)
+{
+	{
+		MutexLockGuard lock(mutex_);
+		pendingFunctors_.push_back(std::move(cb));
+	}
+
+	if (!isInLoopThread() || callingPendingFunctors_)
+	{
+		wakeup();
+	}
+}
+
+size_t EventLoop::queueSize() const
+{
+	MutexLockGuard lock(mutex_);
+	return pendingFunctors_.size();
+}
+
 void EventLoop::updateChannel(Channel* channel)
 {
 	assert(channel->ownerLoop() == this);
@@ -121,4 +187,21 @@ bool EventLoop::hasChannel(Channel* channel)
 	assert(channel->ownerLoop() == this);
 	assertInLoopThread();
 	return poller_->hasChannel(channel);
+}
+
+void EventLoop::abortNotInLoopThread()
+{
+  LOG_FATAL << "EventLoop::abortNotInLoopThread - EventLoop " << this
+            << " was created in threadId_ = " << threadId_
+            << ", current thread id = " <<  CurrentThread::tid();
+}
+
+void EventLoop::wakeup()
+{
+	uint64_t one = 1;
+	ssize_t n = sockets::write(wakeupFd_, &one, sizeof(one));
+	if (n != sizeof(one))
+	{
+    LOG_ERROR << "EventLoop::wakeup() writes " << n << " bytes instead of 8";
+	}
 }

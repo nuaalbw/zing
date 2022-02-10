@@ -39,7 +39,8 @@ Logger::LogLevel initLogLevel()
 	{
 		return Logger::DEBUG;
 	}
-	else {
+	else 
+  {
 		return Logger::INFO;
 	}
 }

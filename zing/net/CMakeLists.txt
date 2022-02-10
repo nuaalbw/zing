@@ -17,16 +17,14 @@ set(net_SRCS
   Poller.cpp
   PollPoller.cpp
   EPollPoller.cpp
-  # poller/DefaultPoller.cc
-  # poller/EPollPoller.cc
-  # poller/PollPoller.cc
+  DefaultPoller.cpp
   # Socket.cc
-  # SocketsOps.cc
+  SocketsOps.cpp
   # TcpClient.cc
   # TcpConnection.cc
   # TcpServer.cc
-  # Timer.cc
-  # TimerQueue.cc
+  Timer.cpp
+  TimerQueue.cpp
   )
 
 add_library(zing_net ${net_SRCS})
@@ -58,9 +56,9 @@ install(FILES ${HEADERS} DESTINATION include/muduo/net)
 # add_subdirectory(http)
 # add_subdirectory(inspect)
 
-# if(ZING_BUILD_EXAMPLES)
-#   add_subdirectory(tests)
-# endif()
+if(ZING_BUILD_EXAMPLES)
+  add_subdirectory(tests)
+endif()
 
 # if(PROTOBUF_FOUND)
 #   add_subdirectory(protobuf)

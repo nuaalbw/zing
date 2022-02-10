@@ -12,6 +12,8 @@
 #include "../base/CurrentThread.h"
 #include "../base/Mutex.h"
 #include "../base/Timestamp.h"
+#include "Callbacks.h"
+#include "TimerId.h"
 
 #include <atomic>
 #include <memory>
@@ -35,13 +37,29 @@ public:
 	~EventLoop();
 
 	void loop();
-	
+
+	void quit();
+
+	void runInLoop(Functor cb);	// 在EventLoop线程中执行回调函数
+	void queueInLoop(Functor cb);
+
+	size_t queueSize() const;
+
+	// TimerId runAt(Timestamp time, TimerCallback cb);
+
+  // TimerId runAfter(double delay, TimerCallback cb);
+
+  // TimerId runEvery(double interval, TimerCallback cb);
+
+  // void cancel(TimerId timerId);
+
+  void wakeup();
 
 	void assertInLoopThread()
 	{
 		if (!isInLoopThread())	
 		{
-			abortInLoopThread();
+			abortNotInLoopThread();
 		}
 	}
 
@@ -57,7 +75,7 @@ public:
 	static EventLoop* getEventLoopOfCurrentThread();
 
 private:
-	void abortInLoopThread();
+	void abortNotInLoopThread();
 
 	using ChannelList = std::vector<Channel*>;
 
@@ -70,8 +88,8 @@ private:
 	Timestamp pollReturnTime_;
 	std::unique_ptr<Poller> poller_;
 	// std::unique_ptr<TimerQueue> timerQueue_;
-	// int wakeupFd_;
-	// std::unique_ptr<Channel> wakeupChannel_;
+	int wakeupFd_;
+	std::unique_ptr<Channel> wakeupChannel_;
 	// boost::any context_;
 
 	ChannelList activeChannels_;
