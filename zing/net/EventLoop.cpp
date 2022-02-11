@@ -68,7 +68,7 @@ EventLoop::EventLoop()
 		iteration_(0), 
 		threadId_(CurrentThread::tid()),
 		poller_(Poller::newDefaultPoller(this)), 
-		// timerQueue_(new TimerQueue(this)), 
+		timerQueue_(new TimerQueue(this)), 
 		wakeupFd_(createEventfd()), 
 		wakeupChannel_(new Channel(this, wakeupFd_)), 
 		currentActiveChannel_(nullptr)
@@ -83,12 +83,18 @@ EventLoop::EventLoop()
 	{
 		t_loopInThisThread = this;
 	}
+	wakeupChannel_->setReadCallback(
+			std::bind(&EventLoop::handleRead, this));
+	wakeupChannel_->enableReading();	// 持续监听EventFd的读事件
 }
 
 EventLoop::~EventLoop()
 {
 	LOG_DEBUG << "EventLoop " << this << " of thread " << threadId_
 						<< " destructs in thread " << CurrentThread::tid();
+	wakeupChannel_->disableAll();
+	wakeupChannel_->remove();
+	::close(wakeupFd_);
 	t_loopInThisThread = nullptr;
 }
 
@@ -97,6 +103,7 @@ void EventLoop::loop()
 	assert(!looping_);
 	assertInLoopThread();
 	looping_ = true;
+	quit_ = false;
 	LOG_TRACE << "EventLoop " << this << " start looping";
 
 	while (!quit_)
@@ -106,7 +113,7 @@ void EventLoop::loop()
 		++iteration_;
 		if (Logger::logLevel() <= Logger::TRACE)
 		{
-			// printActiveChannels();
+			printActiveChannels();
 		}
 		eventHandling_ = true;
 		for (Channel* channel: activeChannels_)
@@ -116,7 +123,7 @@ void EventLoop::loop()
 		}
 		currentActiveChannel_ = nullptr;
 		eventHandling_ = false;
-		// doPendingFunctors();
+		doPendingFunctors();
 	}
 
 	LOG_TRACE << "EventLoop " << this << " stop looping";
@@ -163,6 +170,28 @@ size_t EventLoop::queueSize() const
 	return pendingFunctors_.size();
 }
 
+TimerId EventLoop::runAt(Timestamp time, TimerCallback cb)
+{
+	return timerQueue_->addTimer(std::move(cb), time, 0.0);
+}
+
+TimerId EventLoop::runAfter(double delay, TimerCallback cb)
+{
+	Timestamp time(addTime(Timestamp::now(), delay));
+	return runAt(time, std::move(cb));
+}
+
+TimerId EventLoop::runEvery(double interval, TimerCallback cb)
+{
+	Timestamp time(addTime(Timestamp::now(), interval));
+	return timerQueue_->addTimer(std::move(cb), time, interval);
+}
+
+void EventLoop::cancel(TimerId timerId)
+{
+	return timerQueue_->cancel(timerId);
+}
+
 void EventLoop::updateChannel(Channel* channel)
 {
 	assert(channel->ownerLoop() == this);
@@ -174,11 +203,11 @@ void EventLoop::removeChannel(Channel* channel)
 {
 	assert(channel->ownerLoop() == this);
 	assertInLoopThread();
-	// if (eventHandling_)
-  // {
-  //   assert(currentActiveChannel_ == channel ||
-  //       std::find(activeChannels_.begin(), activeChannels_.end(), channel) == activeChannels_.end());
-  // }
+	if (eventHandling_)
+  {
+    assert(currentActiveChannel_ == channel ||
+        std::find(activeChannels_.begin(), activeChannels_.end(), channel) == activeChannels_.end());
+  }
   poller_->removeChannel(channel);
 }
 
@@ -204,4 +233,39 @@ void EventLoop::wakeup()
 	{
     LOG_ERROR << "EventLoop::wakeup() writes " << n << " bytes instead of 8";
 	}
+}
+
+void EventLoop::handleRead()
+{
+	uint64_t one = 1;
+	ssize_t n = sockets::read(wakeupFd_, &one, sizeof(one));
+	if (n != sizeof(one))
+	{
+    LOG_ERROR << "EventLoop::handleRead() reads " << n << " bytes instead of 8";
+	}
+}
+
+void EventLoop::doPendingFunctors()
+{
+	std::vector<Functor> functors;
+	callingPendingFunctors_ = true;
+
+	{
+		MutexLockGuard lock(mutex_);
+		functors.swap(pendingFunctors_);
+	}
+
+	for (const Functor& functor: functors)
+	{
+		functor();
+	}
+	callingPendingFunctors_ = false;
+}
+
+void EventLoop::printActiveChannels() const
+{
+  for (const Channel* channel : activeChannels_)
+  {
+    LOG_TRACE << "{" << channel->reventsToString() << "} ";
+  }
 }
