@@ -13,7 +13,7 @@ set(net_SRCS
   EventLoop.cpp
   EventLoopThread.cpp
   # EventLoopThreadPool.cc
-  # InetAddress.cc
+  InetAddress.cpp
   Poller.cpp
   PollPoller.cpp
   EPollPoller.cpp

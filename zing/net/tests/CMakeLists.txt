@@ -21,12 +21,12 @@ target_link_libraries(eventloopthread_unittest zing_net)
 
 # if(BOOSTTEST_LIBRARY)
 # add_executable(buffer_unittest Buffer_unittest.cc)
-# target_link_libraries(buffer_unittest muduo_net boost_unit_test_framework)
+# target_link_libraries(buffer_unittest zing_net boost_unit_test_framework)
 # add_test(NAME buffer_unittest COMMAND buffer_unittest)
 
-# add_executable(inetaddress_unittest InetAddress_unittest.cc)
-# target_link_libraries(inetaddress_unittest muduo_net boost_unit_test_framework)
-# add_test(NAME inetaddress_unittest COMMAND inetaddress_unittest)
+add_executable(inetaddress_unittest InetAddress_unittest.cpp)
+target_link_libraries(inetaddress_unittest zing_net boost_unit_test_framework)
+add_test(NAME inetaddress_unittest COMMAND inetaddress_unittest)
 
 # if(ZLIB_FOUND)
 #   add_executable(zlibstream_unittest ZlibStream_unittest.cc)
