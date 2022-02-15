@@ -6,7 +6,7 @@ if(NOT HAVE_ACCEPT4)
 endif()
 
 set(net_SRCS
-  # Acceptor.cc
+  Acceptor.cpp
   # Buffer.cc
   Channel.cpp
   # Connector.cc

@@ -1,6 +1,9 @@
 add_executable(channel_test Channel_test.cpp)
 target_link_libraries(channel_test zing_net)
 
+add_executable(acceptor_test Acceptor_test.cpp)
+target_link_libraries(acceptor_test zing_net)
+
 add_executable(channel_test2 Channel_test2.cpp)
 target_link_libraries(channel_test2 zing_net)
 
@@ -45,7 +48,7 @@ add_test(NAME inetaddress_unittest COMMAND inetaddress_unittest)
 # add_executable(tcpclient_reg3 TcpClient_reg3.cc)
 # target_link_libraries(tcpclient_reg3 muduo_net)
 
-# add_executable(timerqueue_unittest TimerQueue_unittest.cc)
-# target_link_libraries(timerqueue_unittest muduo_net)
-# add_test(NAME timerqueue_unittest COMMAND timerqueue_unittest)
+add_executable(timerqueue_unittest TimerQueue_unittest.cpp)
+target_link_libraries(timerqueue_unittest zing_net)
+add_test(NAME timerqueue_unittest COMMAND timerqueue_unittest)
 
