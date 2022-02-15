@@ -18,7 +18,7 @@ set(net_SRCS
   PollPoller.cpp
   EPollPoller.cpp
   DefaultPoller.cpp
-  # Socket.cc
+  Socket.cpp
   SocketsOps.cpp
   # TcpClient.cc
   # TcpConnection.cc
