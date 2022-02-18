@@ -7,7 +7,7 @@ endif()
 
 set(net_SRCS
   Acceptor.cpp
-  # Buffer.cc
+  Buffer.cpp
   Channel.cpp
   # Connector.cc
   EventLoop.cpp
@@ -21,7 +21,7 @@ set(net_SRCS
   Socket.cpp
   SocketsOps.cpp
   # TcpClient.cc
-  # TcpConnection.cc
+  TcpConnection.cpp
   # TcpServer.cc
   Timer.cpp
   TimerQueue.cpp
