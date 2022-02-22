@@ -12,7 +12,7 @@ set(net_SRCS
   # Connector.cc
   EventLoop.cpp
   EventLoopThread.cpp
-  # EventLoopThreadPool.cc
+  EventLoopThreadPool.cpp
   InetAddress.cpp
   Poller.cpp
   PollPoller.cpp
@@ -22,7 +22,7 @@ set(net_SRCS
   SocketsOps.cpp
   # TcpClient.cc
   TcpConnection.cpp
-  # TcpServer.cc
+  TcpServer.cpp
   Timer.cpp
   TimerQueue.cpp
   )
