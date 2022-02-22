@@ -35,7 +35,7 @@ class EchoServer
 {
 public:
 	EchoServer(zing::net::EventLoop* loop, 
-			   const zing::net::InetAddress& listenAddr);
+		   const zing::net::InetAddress& listenAddr);
 	
 	void start();
 
@@ -43,8 +43,8 @@ private:
 	void onConnection(const zing::net::TcpConnectionPtr& conn);
 
 	void onMessage(const zing::net::TcpConnectionPtr& conn, 
-		  		   zing::net::Buffer* buf, 
-				   zing::Timestamp time);
+			     zing::net::Buffer* buf, 
+			     zing::Timestamp time);
 
 	zing::net::TcpServer server_;
 };
@@ -66,7 +66,7 @@ using namespace zing;
 using namespace zing::net;
 
 EchoServer::EchoServer(EventLoop* loop, 
-					   const InetAddress& listenAddr)
+		       const InetAddress& listenAddr)
 	: server_(loop, listenAddr, "EchoServer")
 {
 	server_.setConnectionCallback(
@@ -83,17 +83,17 @@ void EchoServer::start()
 void EchoServer::onConnection(const TcpConnectionPtr& conn)
 {
 	LOG_INFO << "EchoServer - " << conn->peerAddress().toIpPort() << " -> "
-			 << conn->localAddress().toIpPort() << " is "
-			 << (conn->connected() ? "UP" : "DOWN");
+		 << conn->localAddress().toIpPort() << " is "
+		 << (conn->connected() ? "UP" : "DOWN");
 }
 
 void EchoServer::onMessage(const TcpConnectionPtr& conn, 
-						   Buffer* buf, 
-						   Timestamp time)
+			   Buffer* buf, 
+			   Timestamp time)
 {
 	string msg(buf->retrieveAllAsString());
 	LOG_INFO << conn->name() << " echo " << msg.size() << " bytes, "
-			 << "data received at " << time.toString();
+		 << "data received at " << time.toString();
 	conn->send(msg);
 }
 ```
