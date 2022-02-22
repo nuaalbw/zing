@@ -18,7 +18,6 @@ zing是**基于C++11**实现的一款Linux轻量级网路库，是本人学习�
 - 使用C++11中的**std::bind**和**std::function**实现设置函数回调、任务添加等功能
 - 基于**单例模式**和**双缓冲技术**实现异步**日志库**，用于记录服务器的运行状态，支持设置多种日志级别和目的地
 - 使用**红黑树**（std::set）实现了**TimerQueue**，利用了现有的STL容器库，实现简单，容易验证其正确性，操作复杂度为O(logN)
-- 使用**双向链表**结构实现**Memory Pool**，能够根据用户需求从内存池上分配内存或将已分配的内存释放回池中，以减少内存碎片的产生
 
 ### 代码示例
 
@@ -27,25 +26,27 @@ zing是**基于C++11**实现的一款Linux轻量级网路库，是本人学习�
 echo.h：
 
 ```cpp
-#ifndef ZING_EXAMPLES_ECHO_H
-#define ZING_EXAMPLES_ECHO_H
+#ifndef ZING_EXAMPLES_ECHO_ECHO_H
+#define ZING_EXAMPLES_ECHO_ECHO_H
 
-#include "EventLoop.h"
-#include "TcpServer.h"
+#include "zing/net/TcpServer.h"
 
 class EchoServer
 {
 public:
-    EchoServer(zing::net::EventLoop* loop);
-    void start(std::string ip, uint16_t port);
+	EchoServer(zing::net::EventLoop* loop, 
+			   const zing::net::InetAddress& listenAddr);
+	
+	void start();
 
 private:
-    void onConnection(zing::net::TcpConnectionPtr conn);
-    bool onMessage(zing::net::TcpConnectionPtr conn,
-                   zing::net::ReadBuffer& buffer);
+	void onConnection(const zing::net::TcpConnectionPtr& conn);
 
-private:
-    zing::net::TcpServer server_;
+	void onMessage(const zing::net::TcpConnectionPtr& conn, 
+		  		   zing::net::Buffer* buf, 
+				   zing::Timestamp time);
+
+	zing::net::TcpServer server_;
 };
 
 #endif
@@ -54,58 +55,67 @@ private:
 echo.cpp：
 
 ```cpp
-#include "echo.h"
-#include "Logger.h"
-
-using namespace zing;
-using namespace zing::net;
-using namespace zing::base;
+#include "examples/echo/echo.h"
+#include "zing/base/Logging.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using std::placeholders::_3;
 
-EchoServer::EchoServer(zing::net::EventLoop* loop)
-    : server_(loop)
+using namespace zing;
+using namespace zing::net;
+
+EchoServer::EchoServer(EventLoop* loop, 
+					   const InetAddress& listenAddr)
+	: server_(loop, listenAddr, "EchoServer")
 {
-    server_.setConnectionCallback(
-	std::bind(&EchoServer::onConnection, this, _1));
-    server_.setMessageCallback(
-	std::bind(&EchoServer::onMessage, this, _1, _2));
+	server_.setConnectionCallback(
+		std::bind(&EchoServer::onConnection, this, _1));
+	server_.setMessageCallback(
+		std::bind(&EchoServer::onMessage, this, _1, _2, _3));
 }
 
-void EchoServer::start(std::string ip, uint16_t port)
+void EchoServer::start()
 {
-    server_.start(ip, port);
+	server_.start();
 }
 
-void EchoServer::onConnection(zing::net::TcpConnectionPtr conn)
+void EchoServer::onConnection(const TcpConnectionPtr& conn)
 {
-    LOG_INFO("EchoServer - ip<%s> port<%d>", conn->ip().c_str(), conn->port());
+	LOG_INFO << "EchoServer - " << conn->peerAddress().toIpPort() << " -> "
+			 << conn->localAddress().toIpPort() << " is "
+			 << (conn->connected() ? "UP" : "DOWN");
 }
 
-bool EchoServer::onMessage(zing::net::TcpConnectionPtr conn,
-                           zing::net::ReadBuffer& buffer)
+void EchoServer::onMessage(const TcpConnectionPtr& conn, 
+						   Buffer* buf, 
+						   Timestamp time)
 {
-    std::string res(buffer.peek(), buffer.readableBytes());
-    buffer.retrieveAll();
-    conn->send(res.c_str(), res.size());
-    return true;
+	string msg(buf->retrieveAllAsString());
+	LOG_INFO << conn->name() << " echo " << msg.size() << " bytes, "
+			 << "data received at " << time.toString();
+	conn->send(msg);
 }
 ```
 
 main.cpp：
 
 ```cpp
-#include "echo.h"
+#include "examples/echo/echo.h"
+#include "zing/base/Logging.h"
+#include "zing/net/EventLoop.h"
+#include <unistd.h>
 
 using namespace zing;
 using namespace zing::net;
 
 int main()
 {
-    EventLoop loop;
-    EchoServer server(&loop);
-    server.start("127.0.0.1", 12345);
-    loop.loop();
+	LOG_INFO << "pid = " << getpid();
+	EventLoop loop;
+	InetAddress listenAddr(8848);
+	EchoServer server(&loop, listenAddr);
+	server.start();
+	loop.loop();
 }
 ```
